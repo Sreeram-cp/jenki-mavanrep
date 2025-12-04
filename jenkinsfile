@@ -1,42 +1,29 @@
 pipeline {
     agent any
 
-    environment {
-        GITHUB_CREDS = credentials('github-packages-cred')
-        JAVA_HOME = tool name: 'sriram'
-        MAVEN_HOME = tool name: 'maven-1'
-        PATH = "${JAVA_HOME}/bin:${PATH}"
-    }
-
     stages {
-
-        stage('Checkout Code') {
+        stage('Clone') {
             steps {
-                checkout scm
+                git url: 'https://github.com/Sreeram-cp/jenki-mavanrep.git', branch: 'main'
             }
         }
 
-        stage('Build & Deploy') {
+        stage('Build') {
             steps {
-                configFileProvider([configFile(fileId: 'maven-github-settings', variable: 'MAVEN_SETTINGS')]) {
-                    bat """
-                        export GH_USER=${GITHUB_CREDS_USR}
-                        export GH_TOKEN=${GITHUB_CREDS_PSW}
-
-                        ${MAVEN_HOME}/bin/mvn -s $MAVEN_SETTINGS -B clean package
-                        ${MAVEN_HOME}/bin/mvn -s $MAVEN_SETTINGS -B deploy
-                    """
-                }
+                sh 'mvn clean install'
             }
         }
-    }
 
-    post {
-        success {
-            echo "Build and deployment completed successfully."
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
         }
-        failure {
-            echo "Pipeline failed."
+
+        stage('Package') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
         }
     }
 }
