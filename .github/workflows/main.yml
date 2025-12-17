@@ -1,0 +1,14 @@
+name: sreeram
+on: 
+  workflow_dispatch
+env:
+  APP_ENV: PRODUCTION
+jobs: 
+   sriram:
+     runs-on: ubuntu-latest
+     steps:
+       - run: |
+           echo " job_for_repo " ${{github.repository}}
+           echo " job for os " ${{ runner.os }}
+           echo " job for arch " ${{ runner.arch }}
+           echo " i am $APP_ENV "
